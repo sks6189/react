@@ -21,7 +21,7 @@ class App extends Component {
           </a>
           <a
             className="App-link"
-            href="./Game/Game.html"
+            href="component/Game/Game.html"
             target="_blank"
           >
             Go Game
