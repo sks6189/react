@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 class List extends Component{
+    fs = null;
 
     constructor(props) {
         super(props);
@@ -18,6 +19,7 @@ class List extends Component{
     itemList(){
         const { items } = this.props;
 
+        console.log(items);
         /*const listItem = items.forEach((data, i) => {
             return (<a href="#" className="list-group-item" data-toggle="modal" data-target="#detail-modal">
                 <p className="list-group-item-heading">{data.title}</p>
@@ -25,7 +27,12 @@ class List extends Component{
         });*/
 
         const itemList = items.map(function(data,j){
-            return (<a href="#" className="list-group-item" data-toggle="modal" data-target="#detail-modal">
+            return (
+                <a href="#"
+                   className="list-group-item"
+                   data-toggle="modal"
+                   data-target="#detail-modal"
+                >
                 <p className="list-group-item-heading">{data.title}</p>
             </a>)
         });

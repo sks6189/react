@@ -5,6 +5,7 @@ import './template.css';
 class Template extends Component {
 
     render(){
+        const {form, list} = this.props;
         return (
             <div className="container pt30">
                 <div className="panel">
@@ -15,10 +16,10 @@ class Template extends Component {
                         todolist
                     </div>
                     <div className="panel-body">
-                        {this.props.form}
+                        {form}
                     </div>
                     <div className="panel-footer">
-                        {this.props.list}
+                        {list}
                     </div>
                 </div>
             </div>

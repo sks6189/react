@@ -6,18 +6,58 @@ import List from "./list";
 
 class App extends Component {
 
-    items = [
-        {"title" : "Number1", "contents" : "text1"},
-        {"title" : "Number2", "contents" : "text2"},
-        {"title" : "Number3", "contents" : "text3"}
-    ];
+    idx = 0;
+    state = {
+        input : '',
+        items : []
+    }
+
+    componentWillMount() {
+        console.log('App componentWillMount (deprecated)');
+        const { state } = this;
+
+        state.items = require('./todoItem.json');
+    }
+
+    inputChange = (e) => {
+        this.setState({
+            input : e.target.value
+        })
+    };
+
+    todoCreate = () => {
+        const{ input, items} = this.state;
+        if(input == '' || !input){
+            alert('내용을 입력하세요.');
+            return;
+        }
+        this.setState({
+            input : '',
+            items : items.concat({
+                idx : this.idx++,
+                title : input,
+                use : 1
+            })
+        });
+    };
 
     render(){
+        const { input, items } = this.state;
+        const { inputChange, todoCreate } = this;
+
         return (
             <div>
                 <Template
-                    form={<Form />}
-                    list={<List items={this.items}/>}
+                    form={
+                        <Form value={ input }
+                              onChange={ inputChange }
+                              todoSubmit={ todoCreate }
+                        />
+                    }
+                    list={
+                        <List items={ items }
+                        />
+                    }
                 />
                 <Modal />
             </div>
