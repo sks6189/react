@@ -1,40 +1,29 @@
 import React, { Component } from 'react';
+import Item from './item';
 
 class List extends Component{
-    fs = null;
 
-    constructor(props) {
-        super(props);
-        console.log('constructor');
-    }
-
-    componentWillMount() {
-        console.log('componentWillMount (deprecated)');
-    }
-
-    componentDidMount() {
-        console.log('componentDidMount');
+    shouldComponentUpdate(nextProps, nextState) {
+        return this.props.items !== nextProps.items;
     }
 
     itemList(){
-        const { items } = this.props;
+        const { items, todoDelete, itemUseChange, todoModify } = this.props;
 
-        console.log(items);
-        /*const listItem = items.forEach((data, i) => {
-            return (<a href="#" className="list-group-item" data-toggle="modal" data-target="#detail-modal">
-                <p className="list-group-item-heading">{data.title}</p>
-            </a>)
-        });*/
+        const itemList = items.map(
+            ({idx, title, use}) => {
 
-        const itemList = items.map(function(data,j){
             return (
-                <a href="#"
-                   className="list-group-item"
-                   data-toggle="modal"
-                   data-target="#detail-modal"
+                <Item idx={idx}
+                      title={title}
+                      use={use}
+                      todoDelete={todoDelete}
+                      itemUseChange={itemUseChange}
+                      todoModify={todoModify}
+                      key={idx}
                 >
-                <p className="list-group-item-heading">{data.title}</p>
-            </a>)
+                </Item>
+                )
         });
 
         return itemList;
