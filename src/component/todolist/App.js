@@ -83,11 +83,13 @@ class App extends Component {
     itemUseChange = (idx) => {
         const { items } = this.state;
 
-        const _index = items.findIndex(items => items.idx === idx); // idx 값 체크
+        // idx 값 체크
+        const _index = items.findIndex(items => items.idx === idx);
 
         const selected = items[_index];
 
-        const changeItems = [...items];
+        //const changeItems = [...items];
+        const changeItems = items;
 
         changeItems[_index] = {
             ...selected,

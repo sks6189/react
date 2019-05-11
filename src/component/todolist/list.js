@@ -3,9 +3,9 @@ import Item from './item';
 
 class List extends Component{
 
-    shouldComponentUpdate(nextProps, nextState) {
+    /*shouldComponentUpdate(nextProps, nextState) {
         return this.props.items !== nextProps.items;
-    }
+    }*/
 
     itemList(){
         const { items, todoDelete, itemUseChange, todoModify } = this.props;

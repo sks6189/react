@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 
 class Item extends Component{
 
-    shouldComponentUpdate(nextProps, nextState) {
+    /*shouldComponentUpdate(nextProps, nextState) {
         return this.props.use !== nextProps.use || this.props.title !== nextProps.title;
-    }
+    }*/
 
     render(){
         const {idx, title, use, todoDelete, itemUseChange, todoModify} = this.props;
