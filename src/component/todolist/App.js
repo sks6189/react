@@ -12,6 +12,8 @@ class App extends Component {
     state = {
         input : '',
         modifyIdx : null,
+        sortType : 'default',
+        sort : 'asc',
         items : []
     };
 
@@ -128,9 +130,54 @@ class App extends Component {
         });
     };
 
+    todoChangeSortType = (name) => {
+
+        this.setState({
+            sortType : name
+        });
+
+        this.todoItemSort(name);
+    };
+
+    todoItemSort = (sortName) => {
+        const { items, sort } = this.state;
+
+        const changeItems = [...items];
+
+        changeItems.sort(function(a,b){
+            switch(sortName){
+                case 'name' :
+                    if(sort === 'asc'){
+                        return a.title < b.title ? -1 : a.title > b.title ? 1 : 0;
+                    }else{
+                        return a.title > b.title ? -1 : a.title < b.title ? 1 : 0;
+                    }
+                break;
+                case 'use' :
+                    if(sort === 'asc'){
+                        return a.use - b.use;
+                    }else{
+                        return b.use - a.use;
+                    }
+                break;
+                case 'default' :
+                    if(sort === 'asc'){
+                        return a.idx - b.idx;
+                    }else{
+                        return b.idx - a.idx;
+                    }
+                    break;
+            }
+        });
+
+        this.setState({
+            items : changeItems
+        });
+    };
+
     render(){
-        const { input, modifyIdx, items } = this.state;
-        const { inputChange, inputKeyPress, todoCreate, todoDelete, itemUseChange, todoModify, todoReset } = this;
+        const { input, modifyIdx, sortType,  items } = this.state;
+        const { inputChange, inputKeyPress, todoCreate, todoDelete, itemUseChange, todoModify, todoReset, todoChangeSortType } = this;
 
         return (
             <div>
@@ -138,10 +185,12 @@ class App extends Component {
                     form={
                         <Form input={ input }
                               modifyIdx={ modifyIdx }
+                              sortType={ sortType }
                               onChange={ inputChange }
                               onKeyPress={ inputKeyPress }
                               todoSubmit={ todoCreate }
                               todoReset={ todoReset }
+                              todoChangeSortType={ todoChangeSortType }
                         />
                     }
                     list={

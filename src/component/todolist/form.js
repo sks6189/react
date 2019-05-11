@@ -7,7 +7,7 @@ class Form extends Component {
     }
 
     render(){
-        const { input, modifyIdx, onChange, onKeyPress, todoSubmit, todoReset } = this.props;
+        const { input, modifyIdx, sortType, onChange, onKeyPress, todoSubmit, todoReset, todoChangeSortType } = this.props;
         return (
             <div className="form-group">
                 <div className="col-md-10">
@@ -37,6 +37,17 @@ class Form extends Component {
                     >
                         초기화
                     </button>
+                </div>
+                <div className="col-md-12">
+                    <select className="form-control"
+                            onChange={(e)=>{
+                                todoChangeSortType(e.target.value);
+                            }}
+                            defaultValue={sortType}>
+                        <option value="default">기본</option>
+                        <option value="name">이름</option>
+                        <option value="use">사용여부</option>
+                    </select>
                 </div>
             </div>
         )

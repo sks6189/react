@@ -6,12 +6,12 @@
   },
   {
     "idx": 1,
-    "title": "text2",
+    "title": "name",
     "use" : true
   },
   {
     "idx": 2,
-    "title": "text3",
+    "title": "111112321",
     "use" : false
   }
 ]
