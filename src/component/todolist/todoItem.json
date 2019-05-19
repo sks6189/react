@@ -7,7 +7,24 @@
   {
     "idx": 1,
     "title": "name",
-    "use" : true
+    "use" : true,
+    "items" : [
+      {
+        "idx": 0,
+        "title": "depth2-text1",
+        "use" : true
+      },
+      {
+        "idx": 1,
+        "title": "depth2-name",
+        "use" : true
+      },
+      {
+        "idx": 2,
+        "title": "depth2-111112321",
+        "use" : false
+      }
+    ]
   },
   {
     "idx": 2,

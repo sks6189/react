@@ -7,33 +7,36 @@ class List extends Component{
         return this.props.items !== nextProps.items;
     }*/
 
-    itemList(){
-        const { items, todoDelete, itemUseChange, todoModify } = this.props;
+    itemList(todoList){
+        const { todoDelete, itemUseChange, todoModify } = this.props;
 
-        const itemList = items.map(
-            ({idx, title, use}) => {
-
-            return (
-                <Item idx={idx}
-                      title={title}
-                      use={use}
-                      todoDelete={todoDelete}
-                      itemUseChange={itemUseChange}
-                      todoModify={todoModify}
-                      key={idx}
-                >
-                </Item>
+        let returnHtml = '';
+        const itemList = todoList.map(
+            ({idx, title, use, items}) => {
+                if(items){
+                    console.log(this.itemList(items));
+                }
+                return (
+                    <Item idx={idx}
+                          title={title}
+                          use={use}
+                          todoDelete={todoDelete}
+                          itemUseChange={itemUseChange}
+                          todoModify={todoModify}
+                          key={idx}>
+                    </Item>
                 )
+
         });
 
         return itemList;
     }
 
     render(){
-
+        const { items } = this.props;
         return (
             <div className="list-group">
-                {this.itemList()}
+                {this.itemList(items)}
             </div>
         )
     }

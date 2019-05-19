@@ -39,15 +39,18 @@ class Form extends Component {
                     </button>
                 </div>
                 <div className="col-md-12">
-                    <select className="form-control"
-                            onChange={(e)=>{
-                                todoChangeSortType(e.target.value);
-                            }}
-                            defaultValue={sortType}>
-                        <option value="default">기본</option>
-                        <option value="name">이름</option>
-                        <option value="use">사용여부</option>
-                    </select>
+                    <div className="input-group">
+                        <div className="input-group-addon">정렬</div>
+                        <select className="form-control"
+                                onChange={(e)=>{
+                                    todoChangeSortType(e.target.value);
+                                }}
+                                defaultValue={sortType}>
+                            <option value="default">기본</option>
+                            <option value="name">이름</option>
+                            <option value="use">사용여부</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         )
