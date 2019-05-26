@@ -9,9 +9,12 @@ import List from "./list";
 class App extends Component {
 
     idx = 0;
+    inputTitle = '할일 등록';
     state = {
         input : '',
+        inputType : '',
         modifyIdx : null,
+        modifyParent : null,
         sortType : 'default',
         sort : 'asc',
         items : []
@@ -20,9 +23,26 @@ class App extends Component {
     componentWillMount() {
         const { state } = this;
 
+        let index = 0;
+
         state.items = require('./todoItem.json');
-        this.idx = (state.items.length);
+
+        this.idx = this.checkIndex(state.items) + 1;
     }
+
+    checkIndex = (items) => {
+        let index = 0;
+        items.map(
+            ({items}) => {
+                items = items || [];
+                if(items.length > 0){
+                    index += this.checkIndex(items);
+                }
+                index++;
+            }
+        )
+        return index;
+    };
 
     inputChange = (e) => {
         this.setState({
@@ -37,79 +57,147 @@ class App extends Component {
         }
     };
 
-    todoCreate = ( type, idx ) => {
-        const{ input, items } = this.state;
+    todoCreate = () => {
+        const{ input, inputType, modifyIdx, modifyParent, items } = this.state;
 
-        if(type === 'modify' && typeof(idx) === 'number' && idx >= 0){
+        if(inputType === 'modify' && typeof(modifyIdx) === 'number' && modifyIdx > 0 && modifyParent >= 0){
 
-            const _index = items.findIndex(items => items.idx === idx); // idx 값 체크
-            const selected = items[_index];
-            const changeItems = [...items];
 
-            changeItems[_index] = {
-                ...selected,
-                title : input
+            let changeItems = [...items];
+
+            if(modifyParent > 0){
+                let parent_index = changeItems.findIndex(items => items.idx === modifyParent);
+                let modifyItems = changeItems[parent_index].items;
+                let _index = modifyItems.findIndex(items => items.idx === modifyIdx);
+
+                changeItems[parent_index].items[_index] = {
+                    ...modifyItems[_index],
+                    title: input
+
+                };
+
+            }else{
+                // idx 값 체크
+                let _index = changeItems.findIndex(items => items.idx === modifyIdx);
+                let selected = changeItems[_index];
+
+                changeItems[_index] = {
+                    ...selected,
+                    title : input
+                };
+
+            }
+            this.setState({
+                items : changeItems
+            });
+
+            this.todoReset();
+        }else{
+            let changeItems = [...items];
+            if(input === '' || !input){
+                alert('내용을 입력하세요.');
+                return;
+            }
+
+            let inputItem = {
+                idx : this.idx++,
+                parent : 0,
+                title : input,
+                use : true,
+                items : []
             };
+
+            if(inputType == 'create' && modifyIdx > 0){
+                inputItem.parent = modifyIdx;
+                let parent_index = changeItems.findIndex(items => items.idx === modifyIdx);
+
+                changeItems[parent_index].items = changeItems[parent_index].items.concat(inputItem);
+
+            }else{
+                changeItems = changeItems.concat(inputItem);
+            }
 
             this.setState({
                 items : changeItems
             });
 
-        }else{
-            if(input === '' || !input){
-                alert('내용을 입력하세요.');
-                return;
-            }
-            this.setState({
-                input : '',
-                modifyIdx : null,
-                items : items.concat({
-                    idx : this.idx++,
-                    title : input,
-                    use : true
-                })
-            });
+            this.todoReset();
         }
     };
 
-    itemDelete = (idx) => {
+    itemDelete = (idx, parent) => {
         const { items } = this.state;
 
-        this.setState({
-            items : items.filter(items => items.idx !== idx)
-        });
 
-    };
-    itemUseChange = (idx) => {
-        const { items } = this.state;
+        let changeItems = [...items];
 
-        // idx 값 체크
-        const _index = items.findIndex(items => items.idx === idx);
+        if(parent > 0){
+            let parent_index = items.findIndex( (items) => items.idx === parent);
+            let deleteItems = changeItems[parent_index].items;
 
-        const selected = items[_index];
+            changeItems[parent_index].items = deleteItems.filter(items => items.idx !== idx);
 
-        //const changeItems = [...items];
-        const changeItems = items;
-
-        changeItems[_index] = {
-            ...selected,
-            use : !selected.use
-        };
+        }else{
+            changeItems = changeItems.filter(items => items.idx !== idx);
+        }
 
         this.setState({
             items : changeItems
         });
 
     };
+    itemUseChange = (idx, parent) => {
+        const { items } = this.state;
 
-    todoDelete = (idx) => {
+        // idx 값 체크
+        // 1depth
+        if(parent < 1){
+            const _index = items.findIndex(items => items.idx === idx);
+
+            const selected = items[_index];
+            const changeItems = [...items]; //const changeItems = items;
+
+
+            changeItems[_index] = {
+                ...selected,
+                use : !selected.use
+            };
+
+
+            this.setState({
+                items : changeItems
+            });
+        }else{
+            // 2depth로 들어갈 때
+            const parent_index = items.findIndex( (items) => items.idx === parent);
+
+            const _index = items[parent_index].items.findIndex( (items) => {
+                return items.idx === idx;
+            });
+
+            const selected = items[parent_index].items[_index];
+            const changeItems = [...items];
+
+            changeItems[parent_index].items[_index] = {
+                ...selected,
+                use : !selected.use
+            };
+
+            this.setState({
+                items : changeItems
+            });
+        }
+
+    };
+
+    todoDelete = (idx, parent) => {
         confirmAlert({
             'title' : '삭제',
             'message' : '정말로 삭제하시겠습니까?',
             'buttons' : [
                 {
                     label : '예',
-                    onClick : () => this.itemDelete(idx)
+                    onClick : () => this.itemDelete(idx, parent)
                 },
                 {
                     label : '아니요'
@@ -118,17 +206,27 @@ class App extends Component {
         })
     };
 
-    todoModify = (title, idx) => {
+    todoModify = (title, idx, parent, type) => {
+        if(type === 'modify'){
+            this.inputTitle = '수정';
+        }else if(type === 'create' && parent === 0){
+            this.inputTitle = '댓글 등록';
+        }
         this.setState({
-            input : title,
-            modifyIdx : idx
+            input : (type === 'create') ? '' : title,
+            inputType : type,
+            modifyIdx : idx,
+            modifyParent : parent
         });
     };
 
     todoReset = () => {
+        this.inputTitle = '할일 등록';
         this.setState({
             input : '',
-            modifyIdx : null
+            inputType : 'create',
+            modifyIdx : null,
+            modifyParent : null
         });
     };
 
@@ -177,22 +275,56 @@ class App extends Component {
         });
     };
 
+    todoDownload = () => {
+        const {items} = this.state;
+
+        let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(items));
+        let downloadUrl = document.createElement('a');
+        downloadUrl.setAttribute('href',dataStr);
+        downloadUrl.setAttribute('download','todoItem.json');
+        document.body.appendChild(downloadUrl);
+        downloadUrl.click();
+        downloadUrl.remove();
+
+    };
+
+    todoFileLoad = (e) => {
+        let fileContent = (e.target.files[0]);
+
+        let reader = new FileReader;
+
+        reader.readAsText(fileContent);
+
+        reader.onload = () => {
+
+            this.setState({
+                items : JSON.parse(reader.result)
+            });
+
+        };
+
+        e.target.value = "";
+    };
+
+
     render(){
-        const { input, modifyIdx, sortType,  items } = this.state;
-        const { inputChange, inputKeyPress, todoCreate, todoDelete, itemUseChange, todoModify, todoReset, todoChangeSortType } = this;
+        const { input, sortType,  items } = this.state;
+        const { inputTitle, inputChange, inputKeyPress, todoCreate, todoDelete, itemUseChange, todoModify, todoReset, todoChangeSortType, todoDownload, todoFileLoad } = this;
 
         return (
             <div>
                 <Template
                     form={
                         <Form input={ input }
-                              modifyIdx={ modifyIdx }
+                              inputTitle={ inputTitle }
                               sortType={ sortType }
                               onChange={ inputChange }
                               onKeyPress={ inputKeyPress }
                               todoSubmit={ todoCreate }
                               todoReset={ todoReset }
                               todoChangeSortType={ todoChangeSortType }
+                              todoDownload={ todoDownload }
+                              todoFileLoad={ todoFileLoad }
                         />
                     }
                     list={

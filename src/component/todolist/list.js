@@ -10,14 +10,12 @@ class List extends Component{
     itemList(todoList){
         const { todoDelete, itemUseChange, todoModify } = this.props;
 
-        let returnHtml = '';
         const itemList = todoList.map(
-            ({idx, title, use, items}) => {
-                if(items){
-                    console.log(this.itemList(items));
-                }
-                return (
+            ({idx, parent, title, use, items}) => {
+                const temp = [];
+                temp.push(
                     <Item idx={idx}
+                          parent={parent}
                           title={title}
                           use={use}
                           todoDelete={todoDelete}
@@ -25,9 +23,14 @@ class List extends Component{
                           todoModify={todoModify}
                           key={idx}>
                     </Item>
-                )
+                );
+                if(items){
+                    temp.push(this.itemList(items));
+                }
+                return temp;
 
         });
+
 
         return itemList;
     }

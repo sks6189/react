@@ -2,17 +2,24 @@ import React, { Component } from 'react';
 
 class Form extends Component {
 
-    shouldComponentUpdate(nextProps, nextState) {
+    /*shouldComponentUpdate(nextProps, nextState) {
         return this.props.input !== nextProps.input;
-    }
+    }*/
 
     render(){
-        const { input, modifyIdx, sortType, onChange, onKeyPress, todoSubmit, todoReset, todoChangeSortType } = this.props;
+        const { input, inputTitle,  sortType, onChange, onKeyPress, todoSubmit, todoReset, todoChangeSortType, todoDownload, todoFileLoad } = this.props;
         return (
             <div className="form-group">
+                <div className="col-md-12">
+                    <input type="file"
+                           id="file"
+                           accept=".json"
+                           onChange={todoFileLoad}
+                    />
+                </div>
                 <div className="col-md-10">
                     <div className="input-group">
-                        <div className="input-group-addon">할일 등록</div>
+                        <div className="input-group-addon">{inputTitle}</div>
                         <input type="text"
                                className="form-control"
                                value={input}
@@ -26,7 +33,7 @@ class Form extends Component {
                     <button
                         className="btn btn-primary"
                         onClick={ () => {
-                            todoSubmit( (typeof(modifyIdx) === 'number' && modifyIdx >= 0) && 'modify', modifyIdx )
+                            todoSubmit()
                         }}
                     >
                         등록
@@ -36,6 +43,12 @@ class Form extends Component {
                         onClick={ todoReset }
                     >
                         초기화
+                    </button>
+                    <button
+                        className="btn btn-default"
+                        onClick={ todoDownload }
+                    >
+                        다운로드
                     </button>
                 </div>
                 <div className="col-md-12">

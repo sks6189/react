@@ -7,29 +7,39 @@ class Item extends Component{
     }*/
 
     render(){
-        const {idx, title, use, todoDelete, itemUseChange, todoModify} = this.props;
+        const {idx, parent, title, use, todoDelete, itemUseChange, todoModify} = this.props;
 
         return (
             <a
                 className={ 'list-group-item' }
                 onClick={() => {
-                    itemUseChange(idx)
+                    itemUseChange(idx, parent)
                 }}>
                 <span className={ `list-group-item-heading ${!use && 'del'}` }>
-                    {title}
+                    {(parent > 0) ? ' └ '+title:title}
                 </span>
+
                 <span className={ 'glyphicon glyphicon-remove' }
                       onClick={(e) => {
                           e.stopPropagation();
-                          todoDelete(idx)
+                          todoDelete(idx, parent)
                       }}>
-                    </span>
+                </span>
                 <span className={ 'glyphicon glyphicon-pencil' }
                       onClick={(e) => {
                           e.stopPropagation();
-                          todoModify(title, idx);
+                          todoModify(title, idx, parent, 'modify');
                       }}>
+                </span>
+                { (parent < 1)
+                    ? <span className={ 'glyphicon glyphicon-plus' }
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                todoModify(title, idx, parent, 'create');
+                            }}>
                     </span>
+                    : ''
+                }
             </a>
         )
     }
