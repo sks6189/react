@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import axios from 'axios';
+
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 import Template from "./template";
@@ -24,8 +26,28 @@ class App extends Component {
         const { state } = this;
 
         let index = 0;
+        const _this = this;
 
-        state.items = require('./todoItem.json');
+        //state.items = require('./todoItem.json');
+
+        const res = async() => {
+            let result = axios.get('http://localhost:8080/todo');
+            let {items} = result.data;
+
+            _this.setState({
+                items : items
+            })
+
+            //console.log(data);
+        };
+
+        /*let result = axios.get('http://localhost:8080/todo');
+
+        console.log(result);
+
+        console.log(res);
+
+        console.log(state.items);*/
 
         this.idx = this.checkIndex(state.items) + 1;
     }
@@ -278,13 +300,15 @@ class App extends Component {
     todoDownload = () => {
         const {items} = this.state;
 
-        let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(items));
+        /*let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(items));
         let downloadUrl = document.createElement('a');
         downloadUrl.setAttribute('href',dataStr);
         downloadUrl.setAttribute('download','todoItem.json');
         document.body.appendChild(downloadUrl);
         downloadUrl.click();
-        downloadUrl.remove();
+        downloadUrl.remove();*/
+
+
 
     };
 
