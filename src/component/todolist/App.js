@@ -28,29 +28,52 @@ class App extends Component {
         let index = 0;
         const _this = this;
 
-        //state.items = require('./todoItem.json');
-
-        const res = async() => {
-            let result = axios.get('http://localhost:8080/todo');
-            let {items} = result.data;
-
-            _this.setState({
-                items : items
-            })
-
-            //console.log(data);
-        };
-
-        /*let result = axios.get('http://localhost:8080/todo');
-
-        console.log(result);
-
-        console.log(res);
-
-        console.log(state.items);*/
+        this.getTodoList();
 
         this.idx = this.checkIndex(state.items) + 1;
     }
+
+    getTodoList(){
+        let _this = this;
+        axios.get('http://localhost:8080/todo')
+        .then(response => {
+            console.log(response);
+
+            if(response.data.code == '0000'){
+                _this.setState({
+                    items : response.data.data
+                });
+                _this.todoReset();
+            }else{
+                alert(response.data.description);
+            }
+
+        });
+    }
+
+    dataChange = (todo, type) =>{
+        let _this = this;
+
+        type = (type == 'del') ? 'delete' : 'write';
+
+        axios({
+            method : 'post',
+            url : 'http://localhost:8080/todo/' + type,
+            headers : {
+                'Content-Type' : 'application/json'
+            },
+            data : todo
+        })
+        .then(response => {
+            if(response.data.code == '0000'){
+                _this.getTodoList();
+            }else{
+                alert(response.data.description);
+            }
+        });
+
+    };
+
 
     checkIndex = (items) => {
         let index = 0;
@@ -62,7 +85,7 @@ class App extends Component {
                 }
                 index++;
             }
-        )
+        );
         return index;
     };
 
@@ -79,42 +102,26 @@ class App extends Component {
         }
     };
 
+
+
     todoCreate = () => {
         const{ input, inputType, modifyIdx, modifyParent, items } = this.state;
 
         if(inputType === 'modify' && typeof(modifyIdx) === 'number' && modifyIdx > 0 && modifyParent >= 0){
 
-
             let changeItems = [...items];
 
-            if(modifyParent > 0){
-                let parent_index = changeItems.findIndex(items => items.idx === modifyParent);
-                let modifyItems = changeItems[parent_index].items;
-                let _index = modifyItems.findIndex(items => items.idx === modifyIdx);
+            let _index = changeItems.findIndex(items => items.idx === modifyIdx);
+            let selected = changeItems[_index];
 
-                changeItems[parent_index].items[_index] = {
-                    ...modifyItems[_index],
-                    title: input
+            changeItems[_index] = {
+                ...selected,
+                title : input
+            };
+            this.dataChange(changeItems[_index]);
 
-                };
-
-            }else{
-                // idx 값 체크
-                let _index = changeItems.findIndex(items => items.idx === modifyIdx);
-                let selected = changeItems[_index];
-
-                changeItems[_index] = {
-                    ...selected,
-                    title : input
-                };
-
-            }
-            this.setState({
-                items : changeItems
-            });
-
-            this.todoReset();
         }else{
+            let _this = this;
             let changeItems = [...items];
             if(input === '' || !input){
                 alert('내용을 입력하세요.');
@@ -122,28 +129,17 @@ class App extends Component {
             }
 
             let inputItem = {
-                idx : this.idx++,
                 parent : 0,
                 title : input,
-                use : true,
-                items : []
+                use : 1
             };
 
             if(inputType == 'create' && modifyIdx > 0){
                 inputItem.parent = modifyIdx;
-                let parent_index = changeItems.findIndex(items => items.idx === modifyIdx);
-
-                changeItems[parent_index].items = changeItems[parent_index].items.concat(inputItem);
-
-            }else{
-                changeItems = changeItems.concat(inputItem);
             }
+            _this.dataChange(inputItem);
 
-            this.setState({
-                items : changeItems
-            });
 
-            this.todoReset();
         }
     };
 
@@ -153,63 +149,26 @@ class App extends Component {
 
         let changeItems = [...items];
 
-        if(parent > 0){
-            let parent_index = items.findIndex( (items) => items.idx === parent);
-            let deleteItems = changeItems[parent_index].items;
 
-            changeItems[parent_index].items = deleteItems.filter(items => items.idx !== idx);
+        let _index = items.findIndex( (items) => items.idx === idx);
 
-        }else{
-            changeItems = changeItems.filter(items => items.idx !== idx);
-        }
-
-        this.setState({
-            items : changeItems
-        });
+        this.dataChange(changeItems[_index], 'del');
 
     };
     itemUseChange = (idx, parent) => {
         const { items } = this.state;
 
-        // idx 값 체크
-        // 1depth
-        if(parent < 1){
-            const _index = items.findIndex(items => items.idx === idx);
+        const _index = items.findIndex(items => items.idx === idx);
 
-            const selected = items[_index];
-            const changeItems = [...items]; //const changeItems = items;
+        const selected = items[_index];
+        const changeItems = [...items]; //const changeItems = items;
 
+        changeItems[_index] = {
+            ...selected,
+            use : !selected.use
+        };
 
-            changeItems[_index] = {
-                ...selected,
-                use : !selected.use
-            };
-
-
-            this.setState({
-                items : changeItems
-            });
-        }else{
-            // 2depth로 들어갈 때
-            const parent_index = items.findIndex( (items) => items.idx === parent);
-
-            const _index = items[parent_index].items.findIndex( (items) => {
-                return items.idx === idx;
-            });
-
-            const selected = items[parent_index].items[_index];
-            const changeItems = [...items];
-
-            changeItems[parent_index].items[_index] = {
-                ...selected,
-                use : !selected.use
-            };
-
-            this.setState({
-                items : changeItems
-            });
-        }
-
+        this.dataChange(changeItems[_index]);
     };
 
     todoDelete = (idx, parent) => {
@@ -299,17 +258,15 @@ class App extends Component {
 
     todoDownload = () => {
         const {items} = this.state;
+        let _this = this;
 
-        /*let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(items));
+        let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(items));
         let downloadUrl = document.createElement('a');
         downloadUrl.setAttribute('href',dataStr);
         downloadUrl.setAttribute('download','todoItem.json');
         document.body.appendChild(downloadUrl);
         downloadUrl.click();
-        downloadUrl.remove();*/
-
-
-
+        downloadUrl.remove();
     };
 
     todoFileLoad = (e) => {
